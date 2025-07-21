@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DocDragon | AI Document Agent</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'EB Garamond', serif;
+      background-color: #0A0A0A;
+      overflow-x: hidden;
+      height: 100vh;
+    }
+    .dragon-font {
+      font-weight: 700;
+    }
+    .chat-container {
+      height: calc(100vh - 200px);
+      overflow-y: auto;
+    }
+    .user-message {
+      background-color: #1E1E1E;
+      border-left: 4px solid #FF6700;
+    }
+    .ai-message {
+      background-color: #1E1E1E;
+      border-left: 4px solid #FF9248;
+    }
+    .typing-indicator {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background-color: #FF9248;
+      margin-right: 5px;
+      animation: typing 1s infinite ease-in-out;
+    }
+    .typing-indicator:nth-child(2) { animation-delay: 0.2s; }
+    .typing-indicator:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes typing {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+  </style>
+</head>
+<body class="bg-black text-gray-200 flex flex-col h-screen">
+  <header class="bg-zinc-950 border-b border-orange-500/30 px-6 py-4 flex items-center justify-between shadow-md z-50">
+    <div class="flex items-center space-x-4">
+      <lottie-player src="https://assets5.lottiefiles.com/packages/lf20_1a8dx7zj.json" background="transparent" speed="1" style="width: 60px; height: 60px" loop autoplay></lottie-player>
+      <h1 class="text-4xl text-orange-400 dragon-font">DocDragon</h1>
+    </div>
+    <button id="mic-button" class="p-3 rounded-full bg-orange-500 hover:bg-orange-400 transition-all shadow-lg">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-black" viewBox="0 0 20 20" fill="currentColor">
+        <path d="M10 14a3 3 0 003-3V5a3 3 0 10-6 0v6a3 3 0 003 3zm5-3a5 5 0 01-10 0H4a6 6 0 0012 0h-1zm-5 7a7 7 0 007-7h-1a6 6 0 01-12 0H3a7 7 0 007 7z" />
+      </svg>
+    </button>
+  </header>
+
+  <main class="flex-1 overflow-hidden max-w-5xl mx-auto w-full px-4 py-6">
+    <div id="chat-container" class="chat-container space-y-4 mb-4 overflow-y-auto">
+      <div class="ai-message p-4 rounded-lg shadow">
+        <div class="flex items-start space-x-3">
+          <div class="flex-shrink-0">
+            <lottie-player src="https://assets5.lottiefiles.com/packages/lf20_1a8dx7zj.json" background="transparent" speed="1" style="width: 30px; height: 30px" loop autoplay></lottie-player>
+          </div>
+          <div>
+            <p class="font-bold text-orange-400">DocDragon</p>
+            <p class="text-gray-300">Hello! I'm your AI document assistant. Ask me anything about NovaTech’s policies or procedures.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-zinc-900 border border-orange-500/30 rounded-lg p-4 shadow-lg">
+      <div class="flex items-center space-x-2">
+        <textarea id="message-input" class="flex-1 bg-black border border-orange-500/20 rounded-lg px-4 py-3 text-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-500/50 resize-none" placeholder="Ask DocDragon anything about company docs..." rows="1"></textarea>
+        <button id="send-button" class="bg-orange-500 hover:bg-orange-400 text-black rounded-lg p-3 transition-all">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+          </svg>
+        </button>
+      </div>
+      <div class="flex justify-between items-center mt-2 text-xs text-gray-500">
+        <div id="typing-indicator" class="hidden flex items-center">
+          <span class="mr-2">DocDragon is typing</span>
+          <div class="typing-indicator"></div>
+          <div class="typing-indicator"></div>
+          <div class="typing-indicator"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const messageInput = document.getElementById('message-input');
+    const sendButton = document.getElementById('send-button');
+    const chatContainer = document.getElementById('chat-container');
+    const typingIndicator = document.getElementById('typing-indicator');
+
+    messageInput.addEventListener('input', function () {
+      this.style.height = 'auto';
+      this.style.height = (this.scrollHeight) + 'px';
+    });
+
+    function addMessage(content, sender = 'ai') {
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `${sender === 'user' ? 'user-message' : 'ai-message'} p-4 rounded-lg shadow`;
+      messageDiv.innerHTML = `
+        <div class="flex items-start space-x-3">
+          <div class="flex-shrink-0">
+            <lottie-player src="https://assets5.lottiefiles.com/packages/lf20_1a8dx7zj.json" background="transparent" speed="1" style="width: 30px; height: 30px" loop autoplay></lottie-player>
+          </div>
+          <div>
+            <p class="font-bold ${sender === 'user' ? 'text-orange-500' : 'text-orange-400'}">${sender === 'user' ? 'You' : 'DocDragon'}</p>
+            <p class="text-gray-300">${content}</p>
+          </div>
+        </div>
+      `;
+      chatContainer.appendChild(messageDiv);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    async function sendMessage() {
+      const message = messageInput.value.trim();
+      if (message === '') return;
+
+      addMessage(message, 'user');
+      messageInput.value = '';
+      messageInput.style.height = 'auto';
+      typingIndicator.classList.remove('hidden');
+
+      try {
+        const response = await fetch("http://localhost:5000/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message })
+        });
+        const data = await response.json();
+        typingIndicator.classList.add('hidden');
+        addMessage(data.answer, 'ai');
+      } catch (err) {
+        typingIndicator.classList.add('hidden');
+        console.error(err);
+        addMessage("⚠️ Sorry! DocDragon couldn’t fetch an answer. Try again later.", 'ai');
+      }
+    }
+
+    sendButton.addEventListener('click', sendMessage);
+    messageInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+
+    document.getElementById("mic-button").addEventListener("click", () => {
+      alert("🎙 Voice input feature coming soon!");
+    });
+  </script>
+</body>
+</html>
